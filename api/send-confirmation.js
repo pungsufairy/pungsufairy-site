@@ -1,24 +1,10 @@
 // /api/send-confirmation.js
-// Vercel 서버리스 함수 — 접수완료 메일(고객) + 신규 주문 알림(관리자, PDF 생성용 JSON 포함) 발송
-// 필요 환경변수:
-//   RESEND_API_KEY  — Resend API 키
-//   ADMIN_EMAIL     — 주문 알림을 받을 본인 이메일 (예: pungsufairy@gmail.com)
+// Vercel 서버리스 함수 — 실제로 Resend를 통해 접수완료 메일을 발송합니다.
+// 필요 환경변수: RESEND_API_KEY (Vercel 프로젝트 설정 > Environment Variables에 등록)
 
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-function buildBirthJson(birth) {
-  if (!birth || !birth.year || !birth.month || !birth.day) return null;
-  return JSON.stringify({
-    year: birth.year, month: birth.month, day: birth.day,
-    hour: birth.timeUnknown ? 12 : (birth.hour ?? 12),
-    minute: birth.timeUnknown ? 0 : (birth.minute ?? 0),
-    gender: birth.gender || 'M',
-    isLunar: !!birth.isLunar,
-    name: birth.name || '',
-  });
-}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -26,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, name, productTitle, price, birth, partner, subChoice, concerns, source } = req.body;
+    const { email, name, productTitle, price } = req.body;
 
     if (!email || !productTitle) {
       return res.status(400).json({ error: '이메일과 리포트 종류는 필수입니다.' });
@@ -37,8 +23,9 @@ export default async function handler(req, res) {
 
     const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
 
-    // 1) 고객용 접수완료 메일
-    const { error: custError } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
+      // ⚠️ 도메인 인증 전까지는 이 발신 주소(onboarding@resend.dev)만 사용 가능합니다.
+      // Resend 대시보드에서 본인 도메인을 인증하면 아래를 '달빛사주 <no-reply@본인도메인.com>' 으로 바꾸세요.
       from: '달빛사주 <onboarding@resend.dev>',
       to: [email],
       subject: `달빛사주 사주풀이 - ${name ? name + '님 ' : ''}${productTitle}`,
@@ -54,75 +41,27 @@ export default async function handler(req, res) {
             <div style="background:#f5f5f9;padding:14px 18px;border-radius:8px;margin:18px 0;font-size:13.5px;line-height:1.8;">
               접수 시간: ${now}<br>
               리포트 종류: ${productTitle}<br>
-              결제 금액: ${price || ''}
+              결제 금액: <b>${price || ''}</b>
+            </div>
+            <div style="background:#fffbf0;border:1px solid #f0d787;border-radius:8px;padding:16px 18px;margin:18px 0;font-size:13.5px;line-height:1.8;">
+              <p style="margin:0 0 8px;font-weight:bold;color:#8a5a00;">무통장 입금 안내</p>
+              은행: <b>카카오뱅크</b><br>
+              계좌번호: <b>3333-19-7175327</b><br>
+              예금주: <b>정승모</b>
+              <p style="margin:10px 0 0;font-size:12px;color:#8a5a00;">입금 확인 후 24시간 내에 리포트를 이 메일로 전달드립니다.</p>
             </div>
             <p style="text-align:center;color:#888;font-size:13px;margin-top:24px;">감사합니다.<br>- 달빛사주 드림</p>
           </div>
         </div>
       `,
     });
-    if (custError) console.error('고객 메일 발송 실패:', custError);
 
-    // 2) 관리자 알림 메일 (PDF 생성용 JSON 포함) — ADMIN_EMAIL 설정된 경우만
-    if (process.env.ADMIN_EMAIL) {
-      const birthJson = buildBirthJson(birth);
-      const partnerJson = partner && partner.year ? buildBirthJson(partner) : null;
-
-      const SOURCE_LABEL = { youtube:'유튜브 🔴', instagram:'인스타그램 💗', tiktok:'틱톡 🖤', direct:'직접 방문(출처 불명)' };
-      const sourceText = SOURCE_LABEL[source] || source || '알 수 없음';
-
-      const html = `
-        <div style="font-family:monospace;max-width:600px;margin:0 auto;padding:20px;">
-          <h2>신규 주문 접수</h2>
-          <p><b>유입 채널:</b> <span style="background:#eef;padding:2px 8px;border-radius:6px;">${sourceText}</span></p>
-          <p><b>상품:</b> ${productTitle} (${price || ''})</p>
-          <p><b>고객 이메일:</b> ${email}</p>
-          <p><b>접수 시간:</b> ${now}</p>
-
-          ${birthJson ? `
-          <h3>본인 정보</h3>
-          <p>이름: ${birth.name || '-'} / 성별: ${birth.gender === 'M' ? '남' : birth.gender === 'F' ? '여' : '-'} /
-             생년월일: ${birth.year}-${birth.month}-${birth.day} ${birth.timeUnknown ? '(시간 모름)' : `${birth.hour ?? '?'}:${String(birth.minute ?? 0).padStart(2,'0')}`} (${birth.isLunar ? '음력' : '양력'})</p>
-          <p><b>PDF 생성용 JSON (그대로 복사해서 사용)</b></p>
-          <pre style="background:#f0f0f0;padding:12px;border-radius:6px;white-space:pre-wrap;word-break:break-all;">${birthJson}</pre>
-          <p style="color:#666;">터미널 명령어:<br>
-          <code>node generate.mjs '${birthJson}' report.pdf</code></p>
-          ` : '<p style="color:#c00;">주의: 생년월일 정보가 비어 있습니다 — 폼 입력을 확인하세요.</p>'}
-
-          ${partnerJson ? `
-          <h3>상대방/자녀 정보</h3>
-          <pre style="background:#f0f0f0;padding:12px;border-radius:6px;white-space:pre-wrap;word-break:break-all;">${partnerJson}</pre>
-          <p style="color:#666;">궁합류 리포트 발송 명령어 (본인 JSON, 상대방 JSON 순서):<br>
-          <code>node send-report.mjs '${birthJson}' ${email} "${productTitle}" '${partnerJson}'</code></p>
-          ` : ''}
-
-          ${subChoice ? `
-          <h3>세부 선택</h3>
-          <p>선택 항목: ${subChoice.selected || '-'}</p>
-          ${subChoice.extra ? `<p>추가 입력: ${subChoice.extra}</p>` : ''}
-          ` : ''}
-
-          ${concerns && concerns.length ? `
-          <h3>고객이 남긴 궁금한 점</h3>
-          ${concerns.map((c, i) => `<p><b>${i+1}. ${c.label}</b><br>${c.answer}</p>`).join('')}
-          ` : ''}
-
-          <hr>
-          <p style="color:#888;font-size:12px;">입금 확인 후 위 명령어로 PDF를 만들고,
-          send-report.mjs로 첨부 발송하세요. (README-report.md 참고)</p>
-        </div>
-      `;
-
-      const { error: adminError } = await resend.emails.send({
-        from: '달빛사주 알림 <onboarding@resend.dev>',
-        to: [process.env.ADMIN_EMAIL],
-        subject: `신규 주문 - ${productTitle} (${birth?.name || '이름없음'})`,
-        html,
-      });
-      if (adminError) console.error('관리자 알림 발송 실패:', adminError);
+    if (error) {
+      console.error('Resend error:', error);
+      return res.status(400).json({ error: error.message || '메일 발송에 실패했습니다.' });
     }
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ success: true, id: data.id });
   } catch (e) {
     console.error('Server error:', e);
     return res.status(500).json({ error: '서버 오류가 발생했습니다.' });
