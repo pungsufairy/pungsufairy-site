@@ -49,7 +49,7 @@ export default async function handler(req, res) {
           </div>
           <div style="padding:28px 24px;">
             <p>${name ? name + '님,' : '안녕하세요,'}</p>
-            <p><b>결 ${productTitle}</b> 접수가 완료되었습니다.</p>
+            <p><b>달빛사주 ${productTitle}</b> 접수가 완료되었습니다.</p>
             <p>결제 확인 후 사주풀이가 시작됩니다.<br><b>24시간 내 이 이메일로 전달드립니다.</b></p>
             <div style="background:#f5f5f9;padding:14px 18px;border-radius:8px;margin:18px 0;font-size:13.5px;line-height:1.8;">
               접수 시간: ${now}<br>
