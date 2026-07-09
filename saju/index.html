@@ -83,7 +83,8 @@
 
   .child-block{background:var(--field);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin:6px 0 22px;}
 
-  .email-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:14px;}
+  .email-row{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:8px;align-items:center;margin-bottom:14px;}
+  .email-row input,.email-row select{min-width:0;}
   .at{color:var(--ink-dim);text-align:center;font-size:14px;}
 
   .submit{width:100%;padding:17px;border:0;border-radius:16px;color:#fff;font-size:15px;font-weight:900;
@@ -310,7 +311,7 @@
   <button class="submit" type="button" onclick="submitOrder()">접수하기</button>
 
   <footer>
-    <a href="../saju/terms.html">이용약관</a>|<a href="saju/privacy.html">개인정보처리방침</a>|<a href="refund.html">환불정책</a>|<a href="business-info.html">사업자정보</a>
+    <a href="terms.html">이용약관</a>|<a href="privacy.html">개인정보처리방침</a>|<a href="refund.html">환불정책</a>|<a href="business-info.html">사업자정보</a>
     <p class="byline">명리서재 by 풍수요정</p>
   </footer>
 </div>
@@ -753,7 +754,7 @@ async function submitOrder(){
     </div>
     <div class="confirm-panel">
       <h6 style="color:${p.badgeColor}">결제 안내</h6>
-      <p>결제 방법: 무통장 입금<br>은행: 카카오뱅크<br>계좌번호: 3333-19-7175327<br>예금주: 정승모<br>입금 금액: <b>${p.price}</b></p>
+      <p>결제 방법: 무통장 입금<br>은행: 토스뱅크<br>계좌번호: 1002-6235-7623<br>예금주: (사업자명 입력)<br>입금 금액: <b>${p.price}</b></p>
     </div>
     <button class="submit" type="button" style="margin-top:18px;" onclick="location.reload()">처음으로</button>
   `;
