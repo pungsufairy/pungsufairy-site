@@ -1,18 +1,88 @@
 // /api/send-confirmation.js
-// Vercel 서버리스 함수 — 실제로 Resend를 통해 접수완료 메일을 발송합니다.
-// 필요 환경변수: RESEND_API_KEY (Vercel 프로젝트 설정 > Environment Variables에 등록)
+// Vercel 서버리스 함수 — Resend로 이메일 발송 + Solapi로 LMS(장문 문자) 발송
+// 필요 환경변수:
+//   RESEND_API_KEY       (Resend API 키)
+//   SOLAPI_API_KEY       (솔라피 API 키)
+//   SOLAPI_API_SECRET    (솔라피 API 시크릿)
+//   SOLAPI_SENDER        (솔라피에 사전등록한 발신번호, 예: '01012345678')
 
 import { Resend } from 'resend';
+import crypto from 'crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// ─────────────────────────────────────────────
+// Solapi HMAC-SHA256 인증 헤더 생성
+// ─────────────────────────────────────────────
+function getSolapiAuthHeader() {
+  const apiKey = process.env.SOLAPI_API_KEY;
+  const apiSecret = process.env.SOLAPI_API_SECRET;
+  const date = new Date().toISOString();
+  const salt = crypto.randomBytes(16).toString('hex');
+  const signature = crypto
+    .createHmac('sha256', apiSecret)
+    .update(date + salt)
+    .digest('hex');
+  return `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${signature}`;
+}
+
+// ─────────────────────────────────────────────
+// LMS(장문 문자) 발송
+// ─────────────────────────────────────────────
+async function sendLMS({ to, name, productTitle, price }) {
+  const from = process.env.SOLAPI_SENDER;
+  if (!from) throw new Error('SOLAPI_SENDER 환경변수가 설정되지 않았습니다.');
+
+  const text = `[달빛사주] ${name ? name + '님 ' : ''}접수 완료
+
+▶ 상품: ${productTitle}
+▶ 결제 금액: ${price || ''}
+
+▶ 무통장 입금 (카카오뱅크)
+계좌: 3333-19-7175327
+예금주: 정승모
+
+※ 안내사항
+· 입금 확인 후 24시간 내 이메일로 리포트 전달
+· 입금자명은 접수하신 성함으로 부탁드립니다
+· 문의: pungsufairy.com/saju
+
+- 달빛사주 드림`;
+
+  const res = await fetch('https://api.solapi.com/messages/v4/send', {
+    method: 'POST',
+    headers: {
+      Authorization: getSolapiAuthHeader(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: {
+        to,
+        from,
+        text,
+        subject: '[달빛사주] 접수 완료',
+        type: 'LMS',
+      },
+    }),
+  });
+
+  const json = await res.json();
+  if (!res.ok || json.statusCode !== '2000') {
+    throw new Error(json.statusMessage || 'LMS 발송 실패');
+  }
+  return json;
+}
+
+// ─────────────────────────────────────────────
+// 메인 핸들러
+// ─────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST 요청만 허용됩니다.' });
   }
 
   try {
-    const { email, name, productTitle, price } = req.body;
+    const { email, phone, name, productTitle, price } = req.body;
 
     if (!email || !productTitle) {
       return res.status(400).json({ error: '이메일과 리포트 종류는 필수입니다.' });
@@ -23,9 +93,8 @@ export default async function handler(req, res) {
 
     const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
 
-    const { data, error } = await resend.emails.send({
-      // ⚠️ 도메인 인증 전까지는 이 발신 주소(onboarding@resend.dev)만 사용 가능합니다.
-      // Resend 대시보드에서 본인 도메인을 인증하면 아래를 '달빛사주 <no-reply@본인도메인.com>' 으로 바꾸세요.
+    // ── 1) 이메일 발송 (Resend) ────────────────
+    const { data: emailData, error: emailError } = await resend.emails.send({
       from: '달빛사주 <onboarding@resend.dev>',
       to: [email],
       subject: `달빛사주 사주풀이 - ${name ? name + '님 ' : ''}${productTitle}`,
@@ -56,12 +125,30 @@ export default async function handler(req, res) {
       `,
     });
 
-    if (error) {
-      console.error('Resend error:', error);
-      return res.status(400).json({ error: error.message || '메일 발송에 실패했습니다.' });
+    if (emailError) {
+      console.error('Resend error:', emailError);
+      return res.status(400).json({ error: emailError.message || '메일 발송에 실패했습니다.' });
     }
 
-    return res.status(200).json({ success: true, id: data.id });
+    // ── 2) LMS 발송 (Solapi) — 실패해도 전체 요청은 성공으로 처리 ────
+    let smsOk = false, smsError = null;
+    if (phone && /^01[0-9]{8,9}$/.test(phone)) {
+      try {
+        await sendLMS({ to: phone, name, productTitle, price });
+        smsOk = true;
+      } catch (e) {
+        smsError = e.message;
+        console.error('Solapi LMS error:', e);
+        // 문자 실패는 로그만 남기고 사용자에게는 성공으로 응답 (이메일은 이미 나감)
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      id: emailData.id,
+      smsOk,
+      smsError,
+    });
   } catch (e) {
     console.error('Server error:', e);
     return res.status(500).json({ error: '서버 오류가 발생했습니다.' });
