@@ -91,7 +91,7 @@ async function sendLMS({ to, name, productTitle, price }) {
 // ─────────────────────────────────────────────
 async function sendCustomerEmail({ email, name, productTitle, price, now }) {
   const { data, error } = await resend.emails.send({
-    from: '달빛사주 <onboarding@resend.dev>',
+    from: '달빛사주 <no-reply@pungsufairy.com>',
     to: [email],
     subject: `달빛사주 사주풀이 - ${name ? name + '님 ' : ''}${productTitle}`,
     html: `
@@ -181,7 +181,7 @@ async function sendAdminEmail({ email, phone, name, productTitle, price,
   `;
 
   const { data, error } = await resend.emails.send({
-    from: '달빛사주 알림 <onboarding@resend.dev>',
+    from: '달빛사주 알림 <no-reply@pungsufairy.com>',
     to: [process.env.ADMIN_EMAIL],
     subject: `🔔 신규 주문 - ${productTitle} (${name || '이름없음'})`,
     html,
