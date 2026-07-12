@@ -18,6 +18,11 @@
   .frame{width:100%;max-width:440px;}
   .card{background:#ffffff;border-radius:26px;padding:32px 24px 24px;box-shadow:0 12px 40px rgba(20,30,60,0.18);}
   .logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:22px;}
+
+  /* 히어로 이미지 — 카드 상단에 꽉 차게 */
+  .hero-wrap{margin:-32px -24px 22px;}
+  .hero-img{width:100%;display:block;border-radius:26px 26px 0 0;}
+  .hero-wrap .disclaimer{padding:14px 24px 0;}
   .logo{width:92px;height:92px;border-radius:50%;
     background:radial-gradient(circle at 38% 32%, #f3e6c4, #c9a24a 72%);
     box-shadow:0 4px 18px rgba(201,162,74,0.35);margin-bottom:14px;}
@@ -78,8 +83,9 @@
   .subnote{font-size:11px;color:var(--ink-faint);text-align:center;margin:8px 0 0;}
 
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
-  .chip{display:flex;align-items:center;gap:6px;background:var(--field);border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:12.5px;cursor:pointer;}
-  .chip .dot{width:7px;height:7px;border-radius:50%;}
+  .chip{display:flex;align-items:center;gap:8px;background:var(--field);border:1px solid var(--line);border-radius:20px;padding:9px 15px;font-size:12.5px;cursor:pointer;font-weight:600;color:var(--ink);transition:transform 0.12s,box-shadow 0.15s;}
+  .chip:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,0.06);}
+  .chip .dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,0.9),0 0 8px currentColor;}
 
   .child-block{background:var(--field);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin:6px 0 22px;}
 
@@ -113,8 +119,49 @@
 }
   .at{color:var(--ink-dim);text-align:center;font-size:14px;}
 
-  .submit{width:100%;padding:17px;border:0;border-radius:16px;color:#fff;font-size:15px;font-weight:900;
-    font-family:inherit;cursor:pointer;background:linear-gradient(100deg,var(--warm),var(--cool));margin-top:6px;}
+  /* 접수하기 — 메인 CTA, 화려한 버전 */
+  .submit{width:100%;padding:20px;border:0;border-radius:18px;color:#fff;font-size:16.5px;font-weight:900;
+    font-family:inherit;cursor:pointer;
+    background:linear-gradient(115deg,var(--warm) 0%,#8B6FE0 50%,var(--cool) 100%);
+    background-size:200% 100%;
+    box-shadow:0 8px 24px rgba(108,99,199,0.35),0 2px 6px rgba(93,207,176,0.25);
+    margin-top:6px;letter-spacing:0.3px;position:relative;overflow:hidden;
+    transition:transform 0.2s,box-shadow 0.2s;
+    animation:submitShine 3.5s ease-in-out infinite;}
+  .submit:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(108,99,199,0.45),0 4px 10px rgba(93,207,176,0.3);}
+  .submit:active{transform:translateY(1px);}
+  @keyframes submitShine{
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+
+  /* 카카오톡 상담 — 노란색, 브랜드 인식 */
+  .kakao-btn{display:flex;align-items:center;gap:12px;width:100%;padding:15px 18px;margin-top:12px;
+    background:#FEE500;border:0;border-radius:14px;text-decoration:none;
+    box-shadow:0 3px 10px rgba(254,229,0,0.35);cursor:pointer;
+    transition:transform 0.15s,box-shadow 0.15s;font-family:inherit;}
+  .kakao-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(254,229,0,0.45);}
+  .kakao-btn .kakao-icon{width:32px;height:32px;background:#3C1E1E;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .kakao-btn .kakao-icon svg{width:18px;height:18px;fill:#FEE500;}
+  .kakao-btn .kakao-txt{flex:1;text-align:left;}
+  .kakao-btn .kakao-title{font-size:14px;font-weight:800;color:#3C1E1E;margin:0;letter-spacing:-0.2px;}
+  .kakao-btn .kakao-sub{font-size:11.5px;color:#3C1E1E;opacity:0.72;margin:2px 0 0;}
+  .kakao-btn .kakao-arrow{color:#3C1E1E;font-size:16px;opacity:0.6;}
+
+  /* 쿠팡 파트너스 — 하단 부수익 */
+  .coupang-btn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;margin-top:14px;
+    background:linear-gradient(100deg,#3B7DF7,#1A6EFF);border:0;border-radius:12px;
+    text-decoration:none;box-shadow:0 3px 10px rgba(26,110,255,0.25);cursor:pointer;
+    transition:transform 0.15s,box-shadow 0.15s;font-family:inherit;}
+  .coupang-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(26,110,255,0.35);}
+  .coupang-btn .coupang-icon{width:28px;height:28px;background:rgba(255,255,255,0.2);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+  .coupang-btn .coupang-txt{flex:1;text-align:left;color:#fff;}
+  .coupang-btn .coupang-title{font-size:13px;font-weight:800;margin:0;}
+  .coupang-btn .coupang-sub{font-size:11px;opacity:0.85;margin:2px 0 0;}
+  .coupang-btn .coupang-arrow{color:#fff;font-size:15px;opacity:0.75;}
+  .coupang-notice{font-size:10.5px;color:var(--ink-faint);text-align:center;margin:8px 4px 0;line-height:1.5;}
 
   footer{text-align:center;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);}
   footer a{font-size:11.5px;color:var(--ink-faint);text-decoration:none;margin:0 8px;}
@@ -123,6 +170,8 @@
     .frame{max-width:600px;}
     .card{padding:44px 40px 32px;}
     .grid{gap:14px;}
+    .hero-wrap{margin:-44px -40px 24px;}
+    .hero-wrap .disclaimer{padding:16px 40px 0;}
   }
   @media(max-width:400px){.row3{grid-template-columns:1fr;}}
 
@@ -168,19 +217,16 @@
   .confirm-panel{background:var(--field);border-radius:14px;padding:16px 18px;margin-top:18px;}
   .confirm-panel h6{font-size:12.5px;text-align:center;margin:0 0 12px;}
   .confirm-panel p{font-size:12.5px;line-height:1.8;margin:0;}</style>
+<!-- Vercel Analytics — 방문자 통계 -->
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <div class="frame"><div class="card">
 
 <div id="view-form">
-  <div class="logo-wrap">
-    <p class="fairy-caption">풍수요정 공식 명리 서비스</p>
-   <img src="/saju/dalbit-logo.png"
-      alt="달빛사주 로고"
-      class="moon-logo" >
-    <div class="brand">달빛사주</div>
-    <p class="tagline-bold">당신의 운명을 천천히 읽어드리는 공간</p>
-    <p class="value-prop">사주 원국부터 재물·직업·관계·건강·대운의 흐름까지,<br>당신의 질문을 담아 한 권의 개인 감정서로 제작해드립니다.</p>
+  <div class="hero-wrap">
+    <img src="/saju/hero.jpg" alt="달빛사주 · 풍수요정 명리서재 — 고민이 깊어질수록 마음은 더 지칩니다. 불안하고 막막한 지금, 당신의 인생 해답을 찾아드릴게요." class="hero-img">
     <p class="disclaimer">입력해주신 정보는 사주 해석에만 사용됩니다.</p>
   </div>
 
@@ -354,10 +400,31 @@
 
   <button class="submit" type="button" onclick="submitOrder()">접수하기</button>
 
+  <a class="kakao-btn" href="http://pf.kakao.com/_YOUR_CHANNEL_ID/chat" target="_blank" rel="noopener">
+    <span class="kakao-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3C6.48 3 2 6.48 2 10.8c0 2.76 1.8 5.2 4.55 6.6-.2.72-.72 2.6-.83 3-.13.5.18.5.4.36.16-.1 2.6-1.77 3.65-2.48.75.1 1.5.15 2.23.15 5.52 0 10-3.48 10-7.63S17.52 3 12 3z"/></svg>
+    </span>
+    <span class="kakao-txt">
+      <p class="kakao-title">달빛사주 1:1 상담</p>
+      <p class="kakao-sub">궁금한 점 카톡으로 편하게 문의하기</p>
+    </span>
+    <span class="kakao-arrow">→</span>
+  </a>
+
   <footer>
     <a href="/saju/terms.html">이용약관</a>|<a href="/saju/privacy.html">개인정보처리방침</a>|<a href="/saju/refund.html">환불정책</a>|<a href="/saju/business-info.html">사업자정보</a>
     <p class="byline">명리서재 by 풍수요정</p>
   </footer>
+
+  <a class="coupang-btn" href="https://link.coupang.com/a/fjWVOcJHSm" target="_blank" rel="noopener">
+    <span class="coupang-icon">🛒</span>
+    <span class="coupang-txt">
+      <p class="coupang-title">쿠팡 주문하고 할인쿠폰 받기</p>
+      <p class="coupang-sub">일상 쇼핑도 알뜰하게, 파트너스 특가 안내</p>
+    </span>
+    <span class="coupang-arrow">→</span>
+  </a>
+  <p class="coupang-notice">이 링크를 통해 쿠팡에서 구매가 발생하면 일정액의 수수료가 지급될 수 있습니다.</p>
 </div>
 
 <div id="view-landing" style="display:none;"></div>
@@ -366,8 +433,47 @@
 </div></div>
 
 <script>
-// 어느 채널(유튜브/인스타/틱톡/허브페이지)에서 넘어왔는지 기록
-const trafficSource = new URLSearchParams(location.search).get('src') || 'direct';
+// ═══════════════════════════════════════════════════════════
+// 유입 경로 추적 (UTM 파라미터 + referrer 감지 + 세션 유지)
+// ═══════════════════════════════════════════════════════════
+const trafficSource = (function(){
+  const params = new URLSearchParams(location.search);
+
+  // 1) UTM 파라미터 우선
+  const utmSource = params.get('utm_source') || params.get('src');
+  const utmMedium = params.get('utm_medium');
+  const utmCampaign = params.get('utm_campaign');
+
+  if(utmSource){
+    // 예: "youtube_profile" 또는 "instagram_bio_2026wealth"
+    const parts = [utmSource, utmMedium, utmCampaign].filter(Boolean);
+    const source = parts.join('_').toLowerCase();
+    try{ sessionStorage.setItem('dalbit_source', source); }catch(e){}
+    return source;
+  }
+
+  // 2) 세션에 저장된 값 (같은 방문 내 페이지 이동 후에도 유지)
+  try{
+    const saved = sessionStorage.getItem('dalbit_source');
+    if(saved) return saved;
+  }catch(e){}
+
+  // 3) referrer로 추측
+  const ref = document.referrer.toLowerCase();
+  if(ref){
+    if(ref.includes('youtube.com') || ref.includes('youtu.be')) return 'youtube_referrer';
+    if(ref.includes('instagram.com')) return 'instagram_referrer';
+    if(ref.includes('threads.net') || ref.includes('threads.com')) return 'threads_referrer';
+    if(ref.includes('tiktok.com')) return 'tiktok_referrer';
+    if(ref.includes('daangn.com') || ref.includes('karrot')) return 'karrot_referrer';
+    if(ref.includes('kakao') || ref.includes('pf.kakao')) return 'kakao_referrer';
+    if(ref.includes('google.com') || ref.includes('naver.com') || ref.includes('daum.net')) return 'search';
+    return 'referrer_other';
+  }
+
+  // 4) 아무 정보 없음 = direct (앱·주소창 직접 입력·북마크 등)
+  return 'direct';
+})();
 
 document.querySelectorAll('.yr-select').forEach(sel => { for (let y = 2026; y >= 1940; y--) sel.innerHTML += `<option>${y}년</option>`; });
 document.querySelectorAll('.mo-select').forEach(sel => { for (let m = 1; m <= 12; m++) sel.innerHTML += `<option>${m}월</option>`; });
@@ -525,7 +631,7 @@ function render(){
     const ch = document.createElement('div');
     ch.className = 'chip';
     ch.style.border = `1px solid ${p.border}`;
-    ch.innerHTML = `<span class="dot" style="background:${p.border}"></span>${p.title.replace(' 풀이','').replace(' 심층풀이','')} →`;
+    ch.innerHTML = `<span class="dot" style="background:${p.badgeColor};color:${p.badgeColor};"></span>${p.title.replace(' 풀이','').replace(' 심층풀이','')} →`;
     ch.onclick = () => showLanding(p.id);
     chips.appendChild(ch);
   });
@@ -823,10 +929,19 @@ async function submitOrder(){
     </div>
     <div class="confirm-panel">
       <h6 style="color:${p.badgeColor}">결제 안내</h6>
-      <p style="margin-bottom:10px;">입금 금액: <b>${p.price}</b></p>
-      <div style="background:#fff;border-radius:10px;padding:12px 14px;">
-        <p style="font-size:11.5px;font-weight:700;color:var(--ink-dim);margin-bottom:4px;">무통장 입금 (카카오뱅크)</p>
+      <p style="margin-bottom:10px;">결제 금액: <b>${p.price}</b></p>
+      <div style="background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+        <p style="font-size:11.5px;font-weight:700;color:var(--ink-dim);margin-bottom:4px;">🇰🇷 국내 · 무통장 입금 (카카오뱅크)</p>
         <p style="margin:0;">은행: 카카오뱅크<br>계좌번호: 3333-19-7175327<br>예금주: 정승모</p>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px 14px;">
+        <p style="font-size:11.5px;font-weight:700;color:var(--ink-dim);margin-bottom:6px;">🌏 해외 거주자 · PayPal 결제</p>
+        <p style="margin:0 0 8px;font-size:12px;color:var(--ink-dim);">해외에서 신청하신 분은 아래 버튼으로 PayPal 결제가 가능합니다.</p>
+        <a href="${p.paypalLink || 'https://www.paypal.com/paypalme/YOUR_PAYPAL_ID'}" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;background:#0070BA;color:#fff;text-decoration:none;padding:11px;border-radius:9px;font-weight:800;font-size:13px;">
+          <span style="font-style:italic;font-weight:900;">PayPal</span> 로 결제하기 →
+        </a>
+        <p style="margin:8px 0 0;font-size:10.5px;color:var(--ink-faint);">결제 시 메모(note)에 접수하신 성함을 남겨주세요.</p>
       </div>
     </div>
     <button class="submit" type="button" style="margin-top:18px;" onclick="location.reload()">처음으로</button>
