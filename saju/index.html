@@ -219,14 +219,13 @@
   .confirm-panel p{font-size:12.5px;line-height:1.8;margin:0;}</style>
 <!-- Vercel Analytics — 방문자 통계 -->
 <script defer src="/_vercel/insights/script.js"></script>
-<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <div class="frame"><div class="card">
 
 <div id="view-form">
   <div class="hero-wrap">
-    <img src="hero.jpg" alt="달빛사주 · 풍수요정 명리서재 — 고민이 깊어질수록 마음은 더 지칩니다. 불안하고 막막한 지금, 당신의 인생 해답을 찾아드릴게요." class="hero-img">
+    <img src="hero.jpg?v=2" alt="달빛사주 · 풍수요정 명리서재 — 고민이 깊어질수록 마음은 더 지칩니다. 불안하고 막막한 지금, 당신의 인생 해답을 찾아드릴게요." class="hero-img">
     <p class="disclaimer">입력해주신 정보는 사주 해석에만 사용됩니다.</p>
   </div>
 
@@ -510,6 +509,24 @@ const products = [
   {id:'business', title:'사업운 풀이', desc:'창업 시기 · 사업 적합도 · 동업 궁합', price:'26,000원', badge:'신상품',
     bg:'linear-gradient(145deg,#fbf5ee,#f7ebde)', border:'#dbba94', badgeColor:'#d18605'},
 ];
+
+// ── PayPal.Me 결제 링크 ──
+// 원화 가격 → 달러 가격 매핑 (해외 거주자용)
+const PAYPAL_ID = 'pungsufairy';
+const KRW_TO_USD = {
+  '26,000원': 25,
+  '36,000원': 33,
+  '49,000원': 45,
+};
+function paypalLink(p){
+  const usd = KRW_TO_USD[p.price];
+  return usd
+    ? `https://paypal.me/${PAYPAL_ID}/${usd}`
+    : `https://paypal.me/${PAYPAL_ID}`;
+}
+function paypalUsd(p){
+  return KRW_TO_USD[p.price] || null;
+}
 
 let selected = products[0].id;
 
@@ -864,7 +881,7 @@ async function submitOrder(){
   // 1) 로딩 상태 먼저 표시
   el.innerHTML = `
       <img
-    src="/saju/dalbit-logo.png"
+    src="dalbit-logo.png"
     alt="달빛사주 로고"
     style="width:100px;height:100px;object-fit:contain;margin-bottom:8px;"
   >
@@ -909,7 +926,7 @@ async function submitOrder(){
   el.innerHTML = `
     <div class="logo-wrap" style="margin-bottom:8px;">
       <img
-    src="/saju/dalbit-logo.png"
+    src="dalbit-logo.png"
     alt="달빛사주 로고"
     style="width:100px;height:100px;object-fit:contain;margin-bottom:8px;"
   >
@@ -936,10 +953,10 @@ async function submitOrder(){
       </div>
       <div style="background:#fff;border-radius:10px;padding:12px 14px;">
         <p style="font-size:11.5px;font-weight:700;color:var(--ink-dim);margin-bottom:6px;">🌏 해외 거주자 · PayPal 결제</p>
-        <p style="margin:0 0 8px;font-size:12px;color:var(--ink-dim);">해외에서 신청하신 분은 아래 버튼으로 PayPal 결제가 가능합니다.</p>
-        <a href="${p.paypalLink || 'https://www.paypal.com/paypalme/YOUR_PAYPAL_ID'}" target="_blank" rel="noopener"
+        <p style="margin:0 0 8px;font-size:12px;color:var(--ink-dim);">해외에서 신청하신 분은 아래 버튼으로 PayPal 결제가 가능합니다.${paypalUsd(p) ? ` (US $${paypalUsd(p)})` : ''}</p>
+        <a href="${paypalLink(p)}" target="_blank" rel="noopener"
            style="display:flex;align-items:center;justify-content:center;gap:8px;background:#0070BA;color:#fff;text-decoration:none;padding:11px;border-radius:9px;font-weight:800;font-size:13px;">
-          <span style="font-style:italic;font-weight:900;">PayPal</span> 로 결제하기 →
+          <span style="font-style:italic;font-weight:900;">PayPal</span> 로 결제하기${paypalUsd(p) ? ` · $${paypalUsd(p)}` : ''} →
         </a>
         <p style="margin:8px 0 0;font-size:10.5px;color:var(--ink-faint);">결제 시 메모(note)에 접수하신 성함을 남겨주세요.</p>
       </div>
