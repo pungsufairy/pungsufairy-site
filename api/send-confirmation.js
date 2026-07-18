@@ -20,14 +20,31 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // ─────────────────────────────────────────────
 function buildBirthJson(birth) {
   if (!birth || !birth.year || !birth.month || !birth.day) return null;
+
+  // 생시(生時)는 절대 임의값(12시)으로 채우지 않는다.
+  // 모르거나 미입력이면 null로 두고 관리자에게 경고를 띄운다.
+  // (임의로 12시를 넣으면 시주가 통째로 틀린 리포트가 나감)
+  const hasTime = !birth.timeUnknown
+    && birth.hour !== undefined && birth.hour !== null && birth.hour !== '';
+
   return JSON.stringify({
     year: birth.year, month: birth.month, day: birth.day,
-    hour: birth.timeUnknown ? 12 : (birth.hour ?? 12),
-    minute: birth.timeUnknown ? 0 : (birth.minute ?? 0),
+    hour: hasTime ? Number(birth.hour) : null,
+    minute: hasTime ? Number(birth.minute ?? 0) : null,
+    timeUnknown: !hasTime,
     gender: birth.gender || 'M',
     isLunar: !!birth.isLunar,
     name: birth.name || '',
+    trueSolarTime: false,
   }, null, 2);
+}
+
+// 생시 확인이 필요한 주문인지 판정 (관리자 경고용)
+function needsTimeCheck(birth) {
+  if (!birth) return true;
+  if (birth.timeUnknown) return true;
+  if (birth.hour === undefined || birth.hour === null || birth.hour === '') return true;
+  return false;
 }
 
 // ─────────────────────────────────────────────
@@ -91,7 +108,7 @@ async function sendLMS({ to, name, productTitle, price }) {
 // ─────────────────────────────────────────────
 async function sendCustomerEmail({ email, name, productTitle, price, now }) {
   const { data, error } = await resend.emails.send({
-    from: '달빛사주 <no-reply@pungsufairy.com>',
+    from: '달빛사주 <onboarding@resend.dev>',
     to: [email],
     subject: `달빛사주 사주풀이 - ${name ? name + '님 ' : ''}${productTitle}`,
     html: `
@@ -133,6 +150,19 @@ async function sendAdminEmail({ email, phone, name, productTitle, price,
 
   const birthJson = buildBirthJson(birth);
   const partnerJson = partner ? JSON.stringify(partner, null, 2) : null;
+  const timeWarning = needsTimeCheck(birth);
+
+  const timeWarningHtml = timeWarning
+    ? `<div style="background:#fff3f3;border:2px solid #e05a5a;border-radius:8px;padding:14px 18px;margin:18px 0;">
+         <p style="margin:0 0 6px;font-weight:bold;color:#c62828;font-size:15px;">[!] 생시(태어난 시간) 확인 필요</p>
+         <p style="margin:0;font-size:13.5px;line-height:1.7;color:#7a2020;">
+           고객이 태어난 시간을 <b>입력하지 않았거나 '모름'</b>으로 접수했습니다.<br>
+           <b>임의로 12시 등을 넣지 마세요.</b> 시(時)가 바뀌면 시주(時柱)가 달라져
+           오행·용신·개운법까지 전부 틀어집니다.<br>
+           리포트 제작 전에 고객에게 <b>태어난 시각을 먼저 확인</b>하세요.
+         </p>
+       </div>`
+    : '';
 
   const concernsHtml = (concerns && concerns.length)
     ? `<h3 style="margin-top:24px;">궁금한 점 3가지</h3>
@@ -150,6 +180,7 @@ async function sendAdminEmail({ email, phone, name, productTitle, price,
   const html = `
     <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:640px;margin:0 auto;padding:24px;">
       <h2 style="border-bottom:2px solid #6C63C7;padding-bottom:8px;">🔔 신규 주문 접수</h2>
+      ${timeWarningHtml}
       <p><b>접수 시간:</b> ${now}</p>
       <p><b>유입 경로:</b> ${source || 'direct'}</p>
 
@@ -181,9 +212,9 @@ async function sendAdminEmail({ email, phone, name, productTitle, price,
   `;
 
   const { data, error } = await resend.emails.send({
-    from: '달빛사주 알림 <no-reply@pungsufairy.com>',
+    from: '달빛사주 알림 <onboarding@resend.dev>',
     to: [process.env.ADMIN_EMAIL],
-    subject: `🔔 신규 주문 - ${productTitle} (${name || '이름없음'})`,
+    subject: `${timeWarning ? '[생시확인필요] ' : ''}🔔 신규 주문 - ${productTitle} (${name || '이름없음'})`,
     html,
   });
   if (error) throw new Error(error.message || '관리자 이메일 발송 실패');
