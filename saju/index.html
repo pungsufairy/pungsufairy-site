@@ -679,10 +679,19 @@
 <input id="custPhone" maxlength="13" placeholder="예: 010-1234-5678" type="tel"/>
 <p style="font-size:11px;color:var(--ink-faint);margin:6px 0 0;">접수 완료 안내와 계좌 정보를 문자로 보내드립니다.</p>
 </div>
+<div class="field">
+<label>추천인 <span style="font-weight:500;color:var(--ink-faint);">(선택)</span></label>
+<input id="custReferrer" maxlength="30" placeholder="예: 김철수 5678" type="text"/>
+<p style="font-size:11px;color:var(--ink-faint);margin:6px 0 0;line-height:1.6;">
+소개해주신 분의 <b>이름과 휴대폰 뒤 4자리</b>를 적어주세요.<br/>
+추천인에게 1회 적립되며, <b>5회 모이면 리포트 1회 무료</b>입니다.<br/>
+<span style="color:#c07a2a;">※ 오픈 기념 할인 기간에는 추천 할인이 중복 적용되지 않습니다.</span>
+</p>
+</div>
 <label class="check" style="margin-bottom:6px;align-items:flex-start;line-height:1.5;">
 <input id="agreePrivacy" style="margin-top:3px;" type="checkbox"/>
 <span>개인정보 수집·이용에 동의합니다. <b>(필수)</b><br/>
-<span style="font-size:11px;color:var(--ink-faint);">수집 항목: 이름·성별·생년월일·태어난 시간·이메일·휴대폰 번호<br/>
+<span style="font-size:11px;color:var(--ink-faint);">수집 항목: 이름·성별·생년월일·태어난 시간·이메일·휴대폰 번호<br/>(선택) 추천인 정보<br/>
       이용 목적: 사주 리포트 제작 및 접수·결제 안내 문자 발송<br/>
       보유 기간: 리포트 발송 후 30일 이내 파기</span>
 </span>
@@ -824,27 +833,59 @@ document.addEventListener('keydown', (e) => {
 });
 
 const products = [
-  {id:'total', title:'종합사주 심층풀이', desc:'종합 분석 · 정밀 해석', price:'49,000원', badge:'PREMIUM',
+  {id:'total', title:'종합사주 심층풀이', desc:'종합 분석 · 정밀 해석', price:'49,000원', krw:49000, usd:45, badge:'PREMIUM',
     bg:'linear-gradient(145deg,#f3eefb,#e7def7)', border:'#ae94db', badgeColor:'#5310c6'},
-  {id:'wealth', title:'금전운 풀이', desc:'돈 흐름 · 리스크 · 기회', price:'26,000원', badge:'BEST',
+  {id:'wealth', title:'금전운 풀이', desc:'돈 흐름 · 리스크 · 기회', price:'26,000원', krw:26000, usd:25, badge:'BEST',
     bg:'linear-gradient(145deg,#eefbf5,#def7eb)', border:'#94dbb8', badgeColor:'#09a557'},
-  {id:'compat', title:'궁합 풀이', desc:'두 사람의 사주 · 궁합 점수', price:'49,000원', badge:'BEST',
+  {id:'compat', title:'궁합 풀이', desc:'두 사람의 사주 · 궁합 점수', price:'49,000원', krw:49000, usd:45, badge:'BEST',
     bg:'linear-gradient(145deg,#eefbf9,#def7f2)', border:'#94dbcd', badgeColor:'#09a586'},
-  {id:'child', title:'자녀궁합 풀이', desc:'부모·자녀 사주 · 궁합 점수', price:'49,000원', badge:'NEW',
+  {id:'child', title:'자녀궁합 풀이', desc:'부모·자녀 사주 · 궁합 점수', price:'49,000원', krw:49000, usd:45, badge:'NEW',
     bg:'linear-gradient(145deg,#eef5fb,#deebf7)', border:'#94b8db', badgeColor:'#0564d1'},
-  {id:'love', title:'연애운 풀이', desc:'관계 · 타이밍 · 선택', price:'36,000원', badge:'인기',
+  {id:'love', title:'연애운 풀이', desc:'관계 · 타이밍 · 선택', price:'36,000원', krw:36000, usd:33, badge:'인기',
     bg:'linear-gradient(145deg,#fbeef3,#f7dee7)', border:'#db94ac', badgeColor:'#c6104d'},
-  {id:'marriage', title:'결혼운 풀이', desc:'배우자 인연 · 결혼 시기', price:'36,000원', badge:'인기',
+  {id:'marriage', title:'결혼운 풀이', desc:'배우자 인연 · 결혼 시기', price:'36,000원', krw:36000, usd:33, badge:'인기',
     bg:'linear-gradient(145deg,#fbf1ee,#f7e3de)', border:'#dba294', badgeColor:'#c63410'},
-  {id:'naming', title:'작명 풀이', desc:'아이 사주 · 오행 이름 · 획수', price:'26,000원', badge:'NEW',
+  {id:'naming', title:'작명 풀이', desc:'아이 사주 · 오행 이름 · 획수', price:'26,000원', krw:26000, usd:25, badge:'NEW',
     bg:'linear-gradient(145deg,#fbf7ee,#f7efde)', border:'#dbc694', badgeColor:'#c69010'},
-  {id:'taekil', title:'택일 풀이', desc:'결혼식 · 이사 · 개업, 언제가 좋을까', price:'26,000원', badge:'신상품',
+  {id:'taekil', title:'택일 풀이', desc:'결혼식 · 이사 · 개업, 언제가 좋을까', price:'26,000원', krw:26000, usd:25, badge:'신상품',
     bg:'linear-gradient(145deg,#fbeef7,#f7deef)', border:'#db94c3', badgeColor:'#c61089'},
-  {id:'career', title:'직장운 풀이', desc:'지금 옮겨? 더 버텨? 3년 타임라인', price:'26,000원', badge:'신상품',
+  {id:'career', title:'직장운 풀이', desc:'지금 옮겨? 더 버텨? 3년 타임라인', price:'26,000원', krw:26000, usd:25, badge:'신상품',
     bg:'linear-gradient(145deg,#f1eefb,#e3def7)', border:'#a294db', badgeColor:'#3410c6'},
-  {id:'business', title:'사업운 풀이', desc:'창업 시기 · 사업 적합도 · 동업 궁합', price:'26,000원', badge:'신상품',
+  {id:'business', title:'사업운 풀이', desc:'창업 시기 · 사업 적합도 · 동업 궁합', price:'26,000원', krw:26000, usd:25, badge:'신상품',
     bg:'linear-gradient(145deg,#fbf5ee,#f7ebde)', border:'#dbba94', badgeColor:'#d18605'},
 ];
+
+// ══════════════════════════════════════════════
+// ★ 오픈 기념 할인 설정 — 이 숫자 하나만 바꾸면 전체 반영됩니다
+//    0.20 = 20% 할인 / 0.30 = 30% 할인 / 0 = 할인 없음
+// ══════════════════════════════════════════════
+const OPEN_DISCOUNT = 0.20;
+const DISCOUNT_LABEL = '오픈 기념';
+
+const won = n => n.toLocaleString('ko-KR') + '원';
+// 할인 적용가(100원 단위 반올림)
+function priceKrw(p){
+  if (!OPEN_DISCOUNT) return p.krw;
+  return Math.round(p.krw * (1 - OPEN_DISCOUNT) / 100) * 100;
+}
+function priceUsd(p){
+  if (!OPEN_DISCOUNT) return p.usd;
+  return Math.max(1, Math.round(p.usd * (1 - OPEN_DISCOUNT)));
+}
+// 접수메일·서버로 보낼 텍스트
+function priceText(p){
+  return OPEN_DISCOUNT
+    ? `${won(priceKrw(p))} (${DISCOUNT_LABEL} ${Math.round(OPEN_DISCOUNT*100)}% 할인, 정가 ${won(p.krw)})`
+    : won(p.krw);
+}
+// 화면 표시용 — 정가에 취소선 + 할인가
+function priceHtml(p, size){
+  const s = size || 1;
+  if (!OPEN_DISCOUNT) return won(p.krw);
+  return `<span style="text-decoration:line-through;opacity:.45;font-weight:600;font-size:${0.78*s}em;margin-right:5px;">${won(p.krw)}</span>`
+       + `<span style="color:#d1355b;font-weight:900;">${won(priceKrw(p))}</span>`
+       + `<span style="display:inline-block;margin-left:5px;font-size:${0.66*s}em;font-weight:800;color:#fff;background:#d1355b;border-radius:5px;padding:2px 5px;vertical-align:middle;">${Math.round(OPEN_DISCOUNT*100)}%</span>`;
+}
 
 // ── PayPal.Me 결제 링크 ──
 // 원화 가격 → 달러 가격 매핑 (해외 거주자용)
@@ -855,13 +896,13 @@ const KRW_TO_USD = {
   '49,000원': 45,
 };
 function paypalLink(p){
-  const usd = KRW_TO_USD[p.price];
+  const usd = priceUsd(p);
   return usd
     ? `https://paypal.me/${PAYPAL_ID}/${usd}`
     : `https://paypal.me/${PAYPAL_ID}`;
 }
 function paypalUsd(p){
-  return KRW_TO_USD[p.price] || null;
+  return priceUsd(p) || null;
 }
 
 let selected = products[0].id;
@@ -899,28 +940,28 @@ const DETAIL = {
   compat: {theme:'#6C63C7', tint:'#f6f4fc', eyebrow:'궁합 리포트',
     h1:'잘 맞을지,', h2:'사주가 먼저 봅니다.',
     sub:'두 사람의 오행·십신·일간을 8개 축으로 교차 분석.\n결혼 후 조화 포인트와 부딪힐 포인트를 미리 정리해드립니다.',
-    stats:[['분석 축','궁합 8축'],['리포트 분량','10장 · 본문+부록'],['분석 대상','두 사람 사주']],
-    steps:[['두 사람 정보','본인 + 상대 사주 정보를 입력'],['8축 궁합 진단','오행·십신·일간·납음 등 8개 축 점수 산출'],['관계 시뮬레이션','결혼 후 갈등·조화 포인트를 구체 진단'],['3가지 질문 심층 분석','입력하신 관계 고민 3가지를 두 사람 사주에 대입해 개별 풀이'],['10장 풀 리포트','전반 흐름 + 강점·약점 + 관계 운영 가이드 + 3가지 답변']],
+    stats:[['분석 축','궁합 8축'],['리포트 분량','30장 · 본문+부록'],['분석 대상','두 사람 사주']],
+    steps:[['두 사람 정보','본인 + 상대 사주 정보를 입력'],['8축 궁합 진단','오행·십신·일간·납음 등 8개 축 점수 산출'],['관계 시뮬레이션','결혼 후 갈등·조화 포인트를 구체 진단'],['3가지 질문 심층 분석','입력하신 관계 고민 3가지를 두 사람 사주에 대입해 개별 풀이'],['30장 풀 리포트','전반 흐름 + 강점·약점 + 관계 운영 가이드 + 3가지 답변']],
     cta:'우리 궁합 보기', needsPartner:true, partnerLabel:'상대방 정보 (필수)',
     concerns:[{label:'두 사람이 자주 부딪히는 부분',placeholder:'예: 사소한 걸로 자주 다퉈요'},{label:'다음 단계(결혼·동거 등) 고민',placeholder:'예: 양가 반대가 있어요'},{label:'이 리포트에서 꼭 확인하고 싶은 것',placeholder:'예: 우리 정말 잘 맞는 걸까요'}]},
   child: {theme:'#1f66b8', tint:'#eef5fd', eyebrow:'자녀궁합 풀이',
     h1:'부모와 자녀,', h2:'사주로 먼저 이해합니다.',
     sub:'오행·기질·성향 차이를 축으로 부모-자녀 관계를 교차 분석.\n갈등 포인트와 소통 방법을 미리 정리해드립니다.',
-    stats:[['분석 축','기질·소통 5축'],['리포트 분량','10장 · 본문+부록'],['분석 대상','부모·자녀 사주']],
-    steps:[['두 사람 정보','부모 + 자녀 사주 정보를 입력'],['기질 궁합 진단','오행·기질·성향 축으로 점수 산출'],['소통 시뮬레이션','자주 부딪히는 상황과 대처법 진단'],['3가지 질문 심층 분석','입력하신 자녀 관련 고민 3가지를 부모·자녀 사주에 대입해 개별 풀이'],['10장 풀 리포트','기질 이해 + 소통법 + 갈등 포인트 가이드 + 3가지 답변']],
+    stats:[['분석 축','기질·소통 5축'],['리포트 분량','30장 · 본문+부록'],['분석 대상','부모·자녀 사주']],
+    steps:[['두 사람 정보','부모 + 자녀 사주 정보를 입력'],['기질 궁합 진단','오행·기질·성향 축으로 점수 산출'],['소통 시뮬레이션','자주 부딪히는 상황과 대처법 진단'],['3가지 질문 심층 분석','입력하신 자녀 관련 고민 3가지를 부모·자녀 사주에 대입해 개별 풀이'],['30장 풀 리포트','기질 이해 + 소통법 + 갈등 포인트 가이드 + 3가지 답변']],
     cta:'자녀궁합 보기', needsPartner:true, partnerLabel:'자녀 정보 (필수)',
     concerns:[{label:'아이와 요즘 부딪히는 상황',placeholder:'예: 사춘기 이후 대화가 줄었어요'},{label:'아이 교육·진로 관련 고민',placeholder:'예: 적성에 맞는 진로를 못 찾겠어요'},{label:'이 리포트에서 꼭 알고 싶은 것',placeholder:'예: 아이를 어떻게 대해야 할지'}]},
   naming: {theme:'#4a3f9e', tint:'#f4f2fc', eyebrow:'작명 · 개명',
     h1:'이름은,', h2:'평생 따라가는 운입니다.',
     sub:'사주의 부족한 오행을 채우고, 일간의 강약을 보완하는 이름.\n부르기 쉬운 발음과 좋은 뜻의 한자까지 모두 맞춰드립니다.',
-    stats:[['추천 이름','5~7개'],['한자 DB','8,200자'],['리포트 분량','10장 + 부록']],
-    steps:[['사주 정보','신생아면 아이 사주, 개명이면 본인 사주'],['오행·운 진단','부족 오행 + 강한 십신 + 운 흐름 분석'],['이름 5~7개 추천','한자·획수·발음·뜻 모두 맞춘 이름 + 근거'],['10장 풀 리포트','이름 해설 + 한자 의미 + 발음 가이드']],
+    stats:[['추천 이름','5~7개'],['한자 DB','8,200자'],['리포트 분량','30장 + 부록']],
+    steps:[['사주 정보','신생아면 아이 사주, 개명이면 본인 사주'],['오행·운 진단','부족 오행 + 강한 십신 + 운 흐름 분석'],['이름 5~7개 추천','한자·획수·발음·뜻 모두 맞춘 이름 + 근거'],['30장 풀 리포트','이름 해설 + 한자 의미 + 발음 가이드']],
     cta:'이름 추천받기', needsNaming:true},
   career: {theme:'#1a2140', tint:'#eef0f8', eyebrow:'직장운 리포트',
     h1:'커리어의 결정,', h2:'타이밍이 전부입니다.',
     sub:'만세력으로 풀어낸 내 직장운의 흐름.\n이직·승진·창업, 흔들리는 결정의 무게를 줄여드립니다.',
-    stats:[['분석 축','직장운 4축'],['리포트 분량','9장 · 차트 6종'],['타임라인 범위','향후 3년 (월 단위)']],
-    steps:[['정보 입력','본인 사주 + 현재 직무·고민 (선택)'],['만세력 정밀 분석','직장운 4축 + 대운 + 세운 + 월운 교차'],['3가지 질문 심층 분석','입력하신 커리어 고민 3가지를 사주에 대입해 개별 풀이'],['9장 풀 리포트','차트 6종 + 향후 3년 타임라인 + 액션 체크리스트 + 3가지 답변']],
+    stats:[['분석 축','직장운 4축'],['리포트 분량','20장 · 차트 6종'],['타임라인 범위','향후 3년 (월 단위)']],
+    steps:[['정보 입력','본인 사주 + 현재 직무·고민 (선택)'],['만세력 정밀 분석','직장운 4축 + 대운 + 세운 + 월운 교차'],['3가지 질문 심층 분석','입력하신 커리어 고민 3가지를 사주에 대입해 개별 풀이'],['20장 풀 리포트','차트 6종 + 향후 3년 타임라인 + 액션 체크리스트 + 3가지 답변']],
     cta:'내 직장운 보기',
     subChoice:{question:'어떤 직장운 분석을 원하시나요?', hint:'한 항목을 선택하시면 입력 페이지로 이동합니다.',
       options:[
@@ -936,8 +977,8 @@ const DETAIL = {
   taekil: {theme:'#96396c', tint:'#fbf0f5', eyebrow:'택일 풀이',
     h1:'좋은 날은,', h2:'따로 정해져 있습니다.',
     sub:'본인(과 상대) 사주 기준으로 길일·흉일을 가려냅니다.\n결혼식·이사·개업, 후보 날짜 중 가장 좋은 날을 짚어드립니다.',
-    stats:[['분석 대상','목적별 후보일'],['리포트 분량','8장 · 캘린더 포함'],['범위','향후 6개월']],
-    steps:[['정보 입력','이름·생년월일·태어난 시간 + 희망 시기'],['목적 선택','결혼식 / 이사 / 개업 중 선택'],['길흉일 분석','사주 + 절기 기준 후보일 스코어링'],['8장 풀 리포트','추천 날짜 Top 5 + 피해야 할 날 + 이유 설명']],
+    stats:[['분석 대상','목적별 후보일'],['리포트 분량','20장 · 캘린더 포함'],['범위','향후 6개월']],
+    steps:[['정보 입력','이름·생년월일·태어난 시간 + 희망 시기'],['목적 선택','결혼식 / 이사 / 개업 중 선택'],['길흉일 분석','사주 + 절기 기준 후보일 스코어링'],['20장 풀 리포트','추천 날짜 Top 5 + 피해야 할 날 + 이유 설명']],
     cta:'좋은 날 찾아보기',
     subChoice:{question:'어떤 목적의 택일을 원하시나요?', hint:'한 항목을 선택하시면 입력 페이지로 이동합니다.',
       options:[
@@ -949,8 +990,8 @@ const DETAIL = {
   business: {theme:'#b8862e', tint:'#fdf8ee', eyebrow:'사업운 풀이',
     h1:'사업의 시작과 확장,', h2:'타이밍이 만듭니다.',
     sub:'만세력으로 풀어낸 사업 적합도와 자금·동업 흐름.\n창업·확장·동업, 흔들리는 결정의 무게를 줄여드립니다.',
-    stats:[['분석 축','사업 적합도·재성·동업운'],['리포트 분량','9장 · 차트 포함'],['타임라인 범위','향후 3년']],
-    steps:[['정보 입력','본인 사주 + 현재 사업 상황·고민 (선택)'],['만세력 정밀 분석','사업 적합도 + 재성 흐름 + 대운·세운 교차'],['3가지 질문 심층 분석','입력하신 사업 고민 3가지를 사주에 대입해 개별 풀이'],['9장 풀 리포트','차트 + 향후 3년 타임라인 + 액션 체크리스트 + 3가지 답변']],
+    stats:[['분석 축','사업 적합도·재성·동업운'],['리포트 분량','20장 · 차트 포함'],['타임라인 범위','향후 3년']],
+    steps:[['정보 입력','본인 사주 + 현재 사업 상황·고민 (선택)'],['만세력 정밀 분석','사업 적합도 + 재성 흐름 + 대운·세운 교차'],['3가지 질문 심층 분석','입력하신 사업 고민 3가지를 사주에 대입해 개별 풀이'],['20장 풀 리포트','차트 + 향후 3년 타임라인 + 액션 체크리스트 + 3가지 답변']],
     cta:'내 사업운 보기',
     subChoice:{question:'어떤 사업운 분석을 원하시나요?', hint:'한 항목을 선택하시면 입력 페이지로 이동합니다.',
       options:[
@@ -972,7 +1013,7 @@ function render(){
   const activeProduct = products.find(p => p.id === selected);
   const selectedSummary = document.getElementById('selectedProductSummary');
   if (selectedSummary && activeProduct) {
-    selectedSummary.innerHTML = `<span class="selected-summary-icon">✓</span><span class="selected-summary-text"><small>현재 선택한 리포트</small><strong>${activeProduct.title}</strong></span><span class="selected-summary-price">${activeProduct.price}</span>`;
+    selectedSummary.innerHTML = `<span class="selected-summary-icon">✓</span><span class="selected-summary-text"><small>현재 선택한 리포트</small><strong>${activeProduct.title}</strong></span><span class="selected-summary-price">${priceHtml(activeProduct)}</span>`;
   }
   products.forEach(p => {
     const c = document.createElement('div');
@@ -980,7 +1021,7 @@ function render(){
     c.style.background = (p.id === selected) ? '#e2f0ff' : p.bg;
     c.style.border = (p.id === selected) ? '2.5px solid #2f7fe0' : `1.5px solid ${p.border}`;
     c.innerHTML = `<span class="p-badge" style="background:${p.badgeColor}">${p.badge}</span>
-      <h4>${p.title}</h4><p>${p.desc}</p><div class="price">${p.price}</div>`;
+      <h4>${p.title}</h4><p>${p.desc}</p><div class="price">${priceHtml(p)}</div>`;
     c.onclick = () => { selected = p.id; render(); updateExtras(); };
     grid.appendChild(c);
   });
@@ -1205,6 +1246,8 @@ async function submitOrder(){
   const emailDomain = document.getElementById('emailDomain').value;
   const fullEmail = emailId ? `${emailId}@${emailDomain}` : '';
   const phone = document.getElementById('custPhone').value.replace(/[^0-9]/g, '');
+  const referrerEl = document.getElementById('custReferrer');
+  const referrer = referrerEl ? referrerEl.value.trim() : '';
   const agreed = document.getElementById('agreePrivacy').checked;
   const { birth, partner, subChoice, concerns } = collectBirthData();
   const customerName = birth.name;
@@ -1242,8 +1285,8 @@ async function submitOrder(){
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: fullEmail, phone, name: customerName, productTitle: p.title, price: p.price,
-          birth, partner, subChoice, concerns, source: trafficSource,
+          email: fullEmail, phone, name: customerName, productTitle: p.title, price: priceText(p),
+          birth, partner, subChoice, concerns, source: trafficSource, referrer,
         }),
       });
       const json = await res.json();
@@ -1287,7 +1330,7 @@ async function submitOrder(){
     </div>
     <div class="confirm-panel">
       <h6 style="color:${p.badgeColor}">결제 안내</h6>
-      <p style="margin-bottom:10px;">결제 금액: <b>${p.price}</b></p>
+      <p style="margin-bottom:10px;">결제 금액: <b>${priceHtml(p,1.1)}</b></p>
       <div style="background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;">
         <p style="font-size:11.5px;font-weight:700;color:var(--ink-dim);margin-bottom:4px;">🇰🇷 국내 · 무통장 입금 (카카오뱅크)</p>
         <p style="margin:0;">은행: 카카오뱅크<br>계좌번호: 3333-19-7175327<br>예금주: 정승모</p>
