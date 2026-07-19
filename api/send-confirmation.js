@@ -145,12 +145,23 @@ async function sendCustomerEmail({ email, name, productTitle, price, now }) {
 // 관리자 알림 이메일
 // ─────────────────────────────────────────────
 async function sendAdminEmail({ email, phone, name, productTitle, price,
-                                 birth, partner, subChoice, concerns, source, now }) {
+                                 birth, partner, subChoice, concerns, source, referrer, now }) {
   if (!process.env.ADMIN_EMAIL) throw new Error('ADMIN_EMAIL 환경변수 없음');
 
   const birthJson = buildBirthJson(birth);
   const partnerJson = partner ? JSON.stringify(partner, null, 2) : null;
   const timeWarning = needsTimeCheck(birth);
+
+  // 추천인이 있으면 눈에 띄게 표시 (적립 관리용)
+  const referrerHtml = (referrer && referrer.trim())
+    ? `<div style="background:#eef7f0;border:2px solid #6bbd86;border-radius:8px;padding:14px 18px;margin:18px 0;">
+         <p style="margin:0 0 6px;font-weight:bold;color:#1f7a44;font-size:15px;">[추천] 추천인 적립 대상</p>
+         <p style="margin:0;font-size:15px;line-height:1.7;color:#20502f;">
+           추천인: <b style="font-size:17px;">${referrer}</b><br>
+           <span style="font-size:12.5px;">이 추천인에게 <b>1회 적립</b>하세요. (5회 = 리포트 1회 무료)</span>
+         </p>
+       </div>`
+    : '';
 
   const timeWarningHtml = timeWarning
     ? `<div style="background:#fff3f3;border:2px solid #e05a5a;border-radius:8px;padding:14px 18px;margin:18px 0;">
@@ -181,6 +192,7 @@ async function sendAdminEmail({ email, phone, name, productTitle, price,
     <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:640px;margin:0 auto;padding:24px;">
       <h2 style="border-bottom:2px solid #6C63C7;padding-bottom:8px;">🔔 신규 주문 접수</h2>
       ${timeWarningHtml}
+      ${referrerHtml}
       <p><b>접수 시간:</b> ${now}</p>
       <p><b>유입 경로:</b> ${source || 'direct'}</p>
 
@@ -191,6 +203,7 @@ async function sendAdminEmail({ email, phone, name, productTitle, price,
         <tr><td style="padding:6px 0;color:#666;">고객 이름</td><td>${name || '-'}</td></tr>
         <tr><td style="padding:6px 0;color:#666;">이메일</td><td>${email}</td></tr>
         <tr><td style="padding:6px 0;color:#666;">휴대폰</td><td>${phone || '-'}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">추천인</td><td>${referrer || '-'}</td></tr>
       </table>
 
       ${birthJson ? `
@@ -214,7 +227,7 @@ async function sendAdminEmail({ email, phone, name, productTitle, price,
   const { data, error } = await resend.emails.send({
     from: '달빛사주 알림 <onboarding@resend.dev>',
     to: [process.env.ADMIN_EMAIL],
-    subject: `${timeWarning ? '[생시확인필요] ' : ''}🔔 신규 주문 - ${productTitle} (${name || '이름없음'})`,
+    subject: `${timeWarning ? '[생시확인필요] ' : ''}${(referrer && referrer.trim()) ? '[추천] ' : ''}🔔 신규 주문 - ${productTitle} (${name || '이름없음'})`,
     html,
   });
   if (error) throw new Error(error.message || '관리자 이메일 발송 실패');
@@ -231,7 +244,7 @@ export default async function handler(req, res) {
 
   try {
     const { email, phone, name, productTitle, price,
-            birth, partner, subChoice, concerns, source } = req.body;
+            birth, partner, subChoice, concerns, source, referrer } = req.body;
 
     if (!email || !productTitle) {
       return res.status(400).json({ error: '이메일과 리포트 종류는 필수입니다.' });
@@ -257,7 +270,7 @@ export default async function handler(req, res) {
 
       // 2) 관리자 이메일
       sendAdminEmail({ email, phone, name, productTitle, price,
-                       birth, partner, subChoice, concerns, source, now })
+                       birth, partner, subChoice, concerns, source, referrer, now })
         .then(d => { results.admin = { ok: true, id: d?.id }; })
         .catch(e => {
           results.admin = { ok: false, error: e.message };
